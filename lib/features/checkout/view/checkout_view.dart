@@ -13,11 +13,48 @@ import 'package:provider/provider.dart';
 class CheckoutView extends StatelessWidget {
   const CheckoutView({super.key});
 
+  // UPDATED: Helper function to show missing mandatory info dialog
+  void _showMandatoryInfoDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          content: Text(content),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                // FIX: Navigate to the home/root page (which contains the bottom navigation bar)
+                // and clear all routes beneath it, effectively taking the user to the main screen.
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRouter.home,
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Appcolors.primary),
+              child: const Text('Go to Profile', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   void _proceedToPayment(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     
     if (!userProvider.isLoggedIn) {
-      // User not logged in, show dialog
+      // Existing logic for Unauthorized (Login/Signup)
       showDialog(
         context: context,
         builder: (BuildContext dialogContext) {
@@ -59,8 +96,22 @@ class CheckoutView extends StatelessWidget {
           );
         },
       );
+    } else if (userProvider.deliveryAddress == 'No address provided' || userProvider.deliveryAddress.isEmpty) {
+      // Check for Delivery Address
+      _showMandatoryInfoDialog(
+        context, 
+        'Delivery Address Required', 
+        'To proceed with your order, please update your delivery address in your profile settings.'
+      );
+    } else if (!userProvider.hasCard) {
+      // Check for Payment Card
+      _showMandatoryInfoDialog(
+        context, 
+        'Payment Method Required', 
+        'To proceed with your order, please add a payment card in your profile settings.'
+      );
     } else {
-      // User is logged in, proceed with order
+      // All mandatory information is present, proceed with order
       _placeOrder(context);
     }
   }
@@ -146,6 +197,54 @@ class CheckoutView extends StatelessWidget {
     );
   }
 
+  // Helper function to build the address section with a visual cue for missing info
+  Widget _buildDeliveryAddressSection(UserProvider userProvider) {
+    final isAddressMissing = userProvider.deliveryAddress == 'No address provided' || userProvider.deliveryAddress.isEmpty;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.location_on, color: isAddressMissing ? Appcolors.kPrimaryRed : Appcolors.primary),
+              const SizedBox(width: 10),
+              Text(
+                'Delivery Address',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isAddressMissing ? Appcolors.kPrimaryRed : Colors.black,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            isAddressMissing ? 'Address is missing. Please update in profile.' : userProvider.deliveryAddress,
+            style: TextStyle(
+              fontSize: 16, 
+              color: isAddressMissing ? Appcolors.kPrimaryRed.withOpacity(0.8) : Colors.black87,
+              fontStyle: isAddressMissing ? FontStyle.italic : FontStyle.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,43 +310,7 @@ class CheckoutView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Delivery Information
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.location_on, color: Appcolors.primary),
-                            SizedBox(width: 10),
-                            Text(
-                              'Delivery Address',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          userProvider.deliveryAddress,
-                          style: const TextStyle(fontSize: 16, color: Colors.black87),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildDeliveryAddressSection(userProvider),
                   const SizedBox(height: 20),
 
                   // Order Items
