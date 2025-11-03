@@ -20,45 +20,91 @@ class _HomeViewState extends State<HomeView> {
   List<String> category = ["All", "Burger", "Hotdog", "Drink", "Donut"];
   int selectedCategoryIndex = 0;
 
-  // Mock data for products
+  // Mock data for products - UPDATED with category and more items
   final List<Map<String, String>> products = [
     {
       'image': 'assets/images/item1.png',
       'name': 'Cheeseburger',
       'desc': 'Wendy\'s Burger',
       'rating': '4.5',
+      'category': 'Burger', // Added category
     },
     {
       'image': 'assets/images/item1.png',
       'name': 'Hamburger',
       'desc': 'Classic Beef Burger',
       'rating': '4.7',
+      'category': 'Burger', // Added category
     },
     {
       'image': 'assets/images/item1.png',
       'name': 'Veggie Burger',
       'desc': 'Healthy Choice',
       'rating': '4.3',
+      'category': 'Burger', // Added category
     },
     {
       'image': 'assets/images/item1.png',
       'name': 'Bacon Burger',
       'desc': 'Extra Crispy',
       'rating': '4.8',
+      'category': 'Burger', // Added category
+    },
+    // New items for other categories
+    {
+      'image': 'assets/images/bacon.png',
+      'name': 'Premium Hotdog',
+      'desc': 'Grilled Beef Hotdog',
+      'rating': '4.2',
+      'category': 'Hotdog',
     },
     {
-      'image': 'assets/images/item1.png',
-      'name': 'Double Burger',
-      'desc': 'Double Patty',
-      'rating': '4.6',
-    },
-    {
-      'image': 'assets/images/item1.png',
-      'name': 'Chicken Burger',
-      'desc': 'Grilled Chicken',
+      'image': 'assets/images/bacon.png',
+      'name': 'Spicy Hotdog',
+      'desc': 'Chili Cheese Hotdog',
       'rating': '4.4',
+      'category': 'Hotdog',
+    },
+    {
+      'image': 'assets/images/coleslaw.png',
+      'name': 'Coca-Cola',
+      'desc': 'Refreshing Soda',
+      'rating': '4.6',
+      'category': 'Drink',
+    },
+    {
+      'image': 'assets/images/coleslaw.png',
+      'name': 'Sprite Lemon-Lime',
+      'desc': 'Zero Sugar Option',
+      'rating': '4.1',
+      'category': 'Drink',
+    },
+    {
+      'image': 'assets/images/onionrings.png',
+      'name': 'Chocolate Donut',
+      'desc': 'Sweet Treat',
+      'rating': '4.9',
+      'category': 'Donut',
+    },
+    {
+      'image': 'assets/images/onionrings.png',
+      'name': 'Glazed Donut',
+      'desc': 'Classic Glaze',
+      'rating': '4.5',
+      'category': 'Donut',
     },
   ];
+
+  // NEW: Filtered products getter
+  List<Map<String, String>> get filteredProducts {
+    if (selectedCategoryIndex == 0) {
+      return products; // 'All' category
+    }
+    final selectedCategory = category[selectedCategoryIndex];
+    return products
+        .where((product) => product['category'] == selectedCategory)
+        .toList();
+  }
 
   @override
   void initState() {
@@ -182,21 +228,21 @@ class _HomeViewState extends State<HomeView> {
 
                     const SliverToBoxAdapter(child: Gap(30)),
 
-                    // Product Grid
+                    // Product Grid - UPDATED to use filteredProducts
                     SliverPadding(
                       padding: const EdgeInsets.only(
                           right: 15, left: 15, bottom: 20),
                       sliver: SliverGrid.builder(
-                        itemCount: products.length,
+                        itemCount: filteredProducts.length, // Use filteredProducts
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 0.67,
+                          mainAxisSpacing: 15,
+                          crossAxisSpacing: 15,
+                          childAspectRatio: 0.7,
                         ),
                         itemBuilder: (context, index) {
-                          final product = products[index];
+                          final product = filteredProducts[index]; // Use filteredProducts
                           return GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
