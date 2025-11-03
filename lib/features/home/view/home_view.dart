@@ -17,92 +17,172 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late TextEditingController controller;
-  List<String> category = ["All", "Burger", "Hotdog", "Drink", "Donut"];
+  // EXPANDED CATEGORY LIST
+  List<String> category = ["All", "Burger", "Hotdog", "Drink", "Donut", "Sides", "Salad"];
   int selectedCategoryIndex = 0;
+  String _searchQuery = ''; // NEW: State for search query
 
-  // Mock data for products - UPDATED with category and more items
+  // Mock data for products - EXPANDED with new categories
   final List<Map<String, String>> products = [
     {
       'image': 'assets/images/item1.png',
-      'name': 'Cheeseburger',
-      'desc': 'Wendy\'s Burger',
+      'name': 'Cheeseburger Delight',
+      'desc': 'Wendy\'s Best Burger',
       'rating': '4.5',
-      'category': 'Burger', // Added category
+      'category': 'Burger', 
     },
     {
       'image': 'assets/images/item1.png',
-      'name': 'Hamburger',
-      'desc': 'Classic Beef Burger',
+      'name': 'Hamburger Classic',
+      'desc': 'Classic Beef Patty',
       'rating': '4.7',
-      'category': 'Burger', // Added category
+      'category': 'Burger', 
     },
     {
       'image': 'assets/images/item1.png',
-      'name': 'Veggie Burger',
+      'name': 'Veggie Burger King',
       'desc': 'Healthy Choice',
       'rating': '4.3',
-      'category': 'Burger', // Added category
+      'category': 'Burger', 
     },
     {
       'image': 'assets/images/item1.png',
-      'name': 'Bacon Burger',
-      'desc': 'Extra Crispy',
+      'name': 'Triple Baconator',
+      'desc': 'Extra Crispy Bacon',
       'rating': '4.8',
-      'category': 'Burger', // Added category
+      'category': 'Burger', 
     },
-    // New items for other categories
+    // Hotdog
     {
       'image': 'assets/images/bacon.png',
-      'name': 'Premium Hotdog',
+      'name': 'Street Hotdog',
       'desc': 'Grilled Beef Hotdog',
       'rating': '4.2',
       'category': 'Hotdog',
     },
     {
       'image': 'assets/images/bacon.png',
-      'name': 'Spicy Hotdog',
-      'desc': 'Chili Cheese Hotdog',
+      'name': 'Chili Cheese Dog',
+      'desc': 'Spicy & Savory',
       'rating': '4.4',
       'category': 'Hotdog',
     },
     {
+      'image': 'assets/images/bacon.png',
+      'name': 'Corn Dog Classic',
+      'desc': 'Golden Fried Batter',
+      'rating': '4.1',
+      'category': 'Hotdog',
+    },
+    // Drink
+    {
       'image': 'assets/images/coleslaw.png',
-      'name': 'Coca-Cola',
+      'name': 'Coca-Cola Zero',
       'desc': 'Refreshing Soda',
       'rating': '4.6',
       'category': 'Drink',
     },
     {
       'image': 'assets/images/coleslaw.png',
-      'name': 'Sprite Lemon-Lime',
-      'desc': 'Zero Sugar Option',
-      'rating': '4.1',
+      'name': 'Orange Juice',
+      'desc': 'Freshly Squeezed',
+      'rating': '4.9',
       'category': 'Drink',
     },
     {
+      'image': 'assets/images/coleslaw.png',
+      'name': 'Lemonade Sparkle',
+      'desc': 'Citrus Refreshment',
+      'rating': '4.1',
+      'category': 'Drink',
+    },
+    // Donut
+    {
       'image': 'assets/images/onionrings.png',
-      'name': 'Chocolate Donut',
+      'name': 'Chocolate Glaze',
       'desc': 'Sweet Treat',
       'rating': '4.9',
       'category': 'Donut',
     },
     {
       'image': 'assets/images/onionrings.png',
-      'name': 'Glazed Donut',
-      'desc': 'Classic Glaze',
+      'name': 'Strawberry Jelly',
+      'desc': 'Fruity Filling',
       'rating': '4.5',
       'category': 'Donut',
     },
+    {
+      'image': 'assets/images/onionrings.png',
+      'name': 'Cinnamon Roll Donut',
+      'desc': 'Warm Spices',
+      'rating': '4.0',
+      'category': 'Donut',
+    },
+    // Sides
+    {
+      'image': 'assets/images/fries.png',
+      'name': 'Seasoned Fries',
+      'desc': 'Crispy Potato',
+      'rating': '4.6',
+      'category': 'Sides',
+    },
+    {
+      'image': 'assets/images/onionrings.png',
+      'name': 'Golden Onion Rings',
+      'desc': 'Crispy Onion',
+      'rating': '4.7',
+      'category': 'Sides',
+    },
+    {
+      'image': 'assets/images/coleslaw.png',
+      'name': 'Creamy Coleslaw',
+      'desc': 'Classic Side',
+      'rating': '4.5',
+      'category': 'Sides',
+    },
+    // Salad
+    {
+      'image': 'assets/images/salad.png',
+      'name': 'Garden Salad',
+      'desc': 'Fresh Greens',
+      'rating': '4.3',
+      'category': 'Salad',
+    },
+    {
+      'image': 'assets/images/salad.png',
+      'name': 'Caesar Salad',
+      'desc': 'Chicken Caesar',
+      'rating': '4.4',
+      'category': 'Salad',
+    },
   ];
 
-  // NEW: Filtered products getter
+  // UPDATED: Filtered products getter now includes both Category and Search filtering.
   List<Map<String, String>> get filteredProducts {
-    if (selectedCategoryIndex == 0) {
-      return products; // 'All' category
+    List<Map<String, String>> categoryFiltered;
+    
+    // 1. Filter by Category
+    if (selectedCategoryIndex == 0 || selectedCategoryIndex >= category.length) {
+      categoryFiltered = products; // 'All' category or invalid index returns all
+    } else {
+      final selectedCategory = category[selectedCategoryIndex];
+      categoryFiltered = products
+          .where((product) => product['category'] == selectedCategory)
+          .toList();
     }
-    final selectedCategory = category[selectedCategoryIndex];
-    return products
-        .where((product) => product['category'] == selectedCategory)
+
+    // 2. Filter by Search Query
+    if (_searchQuery.isEmpty) {
+      return categoryFiltered;
+    }
+
+    final query = _searchQuery.toLowerCase().trim();
+
+    return categoryFiltered
+        .where((product) =>
+            product['name']!.toLowerCase().contains(query) ||
+            product['desc']!.toLowerCase().contains(query) ||
+            product['category']!.toLowerCase().contains(query))
         .toList();
   }
 
@@ -142,7 +222,7 @@ class _HomeViewState extends State<HomeView> {
               Expanded(
                 child: CustomScrollView(
                   slivers: [
-                    // Search Bar
+                    // Search Bar - ADDED onChanged for live filtering
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -154,6 +234,11 @@ class _HomeViewState extends State<HomeView> {
                           child: TextField(
                             controller: controller,
                             cursorColor: Appcolors.primary,
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
                             decoration: InputDecoration(
                               fillColor: Colors.white,
                               filled: true,
@@ -197,6 +282,8 @@ class _HomeViewState extends State<HomeView> {
                                 onTap: () {
                                   setState(() {
                                     selectedCategoryIndex = index;
+                                    _searchQuery = ''; // Clear search when category changes
+                                    controller.clear();
                                   });
                                 },
                                 child: Container(
@@ -228,12 +315,12 @@ class _HomeViewState extends State<HomeView> {
 
                     const SliverToBoxAdapter(child: Gap(30)),
 
-                    // Product Grid - UPDATED to use filteredProducts
+                    // Product Grid
                     SliverPadding(
                       padding: const EdgeInsets.only(
                           right: 15, left: 15, bottom: 20),
                       sliver: SliverGrid.builder(
-                        itemCount: filteredProducts.length, // Use filteredProducts
+                        itemCount: filteredProducts.length, // Uses filtered list
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
@@ -242,7 +329,7 @@ class _HomeViewState extends State<HomeView> {
                           childAspectRatio: 0.7,
                         ),
                         itemBuilder: (context, index) {
-                          final product = filteredProducts[index]; // Use filteredProducts
+                          final product = filteredProducts[index]; 
                           return GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(

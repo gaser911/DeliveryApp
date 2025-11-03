@@ -24,7 +24,7 @@ class CardItem extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.grey.shade300, // ✅ Soft clean border
+          color: Colors.grey.shade300, // Soft clean border
           width: 1.2,
         ),
         boxShadow: [
@@ -40,7 +40,7 @@ class CardItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ✅ Product Image
+            // Product Image
             Image.asset(
               image,
               width: 110,
@@ -49,7 +49,7 @@ class CardItem extends StatelessWidget {
             ),
             const Gap(12),
 
-            // ✅ Name
+            // Name
             CustomText(
               text: name,
               fontWeight: FontWeight.w600,
@@ -57,7 +57,7 @@ class CardItem extends StatelessWidget {
               size: 16,
             ),
 
-            // ✅ Description
+            // Description
             CustomText(
               text: desc,
               size: 14,
@@ -66,11 +66,11 @@ class CardItem extends StatelessWidget {
 
             const Gap(10),
 
-            // ✅ Rating with star
+            // Rating with star
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.star_rounded,
                   color: Appcolors.primary,
                   size: 18,
